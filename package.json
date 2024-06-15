@@ -1,0 +1,19 @@
+{
+  "name": "car-system-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MuddasirAbbas303/cars-system-backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MuddasirAbbas303/cars-system-backend/issues"
+  },
+  "homepage": "https://github.com/MuddasirAbbas303/cars-system-backend#readme",
+  "description": ""
+}
