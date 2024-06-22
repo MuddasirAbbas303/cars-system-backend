@@ -1,39 +1,74 @@
-const { getCategories, createCategory, updateCategory, deleteCategory } = require('../models/categoryModel');
+const categoryService = require('../services/categoryService');
 
-const getAllCategories = async (req, res) => {
+/**
+ * Retrieves a list of categories for the authenticated user.
+ *
+ * @param {Object} req - The request object containing the user's ID.
+ * @param {Object} res - The response object to send the categories.
+ *
+ * @returns {void}
+ */
+exports.getCategories = async (req, res) => {
     try {
-        const categories = await getCategories();
+        const categories = await categoryService.getCategories(req.user.userId);
         res.json(categories);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).send('Server error');
     }
-};
+};;
 
-const addCategory = async (req, res) => {
+/**
+ * Adds a new category for the authenticated user.
+ *
+ * @param {Object} req - The request object containing the user's ID and the category name in the request body.
+ * @param {Object} res - The response object to send the created category.
+ *
+ * @returns {void}
+ * 
+ */
+exports.addCategory = async (req, res) => {
     try {
-        const category = await createCategory(req.body);
+        const { name } = req.body;
+        const category = await categoryService.addCategory(req.user.userId, name);
+        res.status(201).json(category);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};;
+
+/**
+ * Updates an existing category for the authenticated user.
+ *
+ * @param {Object} req - The request object containing the user's ID, category ID in the params, and the category name in the request body.
+ * @param {Object} res - The response object to send the updated category.
+ * 
+ * @returns {void}
+ *
+ */
+exports.updateCategory = async (req, res) => {
+    try {
+        const { name } = req.body;
+        const category = await categoryService.updateCategory(req.user.userId, req.params.id, name);
         res.json(category);
     } catch (error) {
-        res.status(500).json({ error: error.message, status: error.code });
+        res.status(500).send(error.message);
     }
-};
+};;
 
-const editCategory = async (req, res) => {
+/**
+ * Deletes a category for the authenticated user.
+ *
+ * @param {Object} req - The request object containing the user's ID and the category ID in the params.
+ * @param {Object} res - The response object to send a success message.
+ *
+ * @returns {void}
+ * 
+ */
+exports.deleteCategory = async (req, res) => {
     try {
-        const category = await updateCategory(req.params.id, req.body);
-        res.json(category);
+        await categoryService.deleteCategory(req.user.userId, req.params.id);
+        res.json({ msg: 'Category removed' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).send(error.message);
     }
 };
-
-const removeCategory = async (req, res) => {
-    try {
-        const category = await deleteCategory(req.params.id);
-        res.json(category);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
-module.exports = { getAllCategories, addCategory, editCategory, removeCategory };

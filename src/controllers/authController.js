@@ -1,39 +1,35 @@
-const { createClient } = require('@supabase/supabase-js');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const config = require('../configs/config');
+const authService = require('../services/authService');
 
-const supabase = createClient(config.SUPABASE_URL, config.SUPABASE_KEY);
+/**
+ * Registers a new user.
+ *
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {void}
+ */
+exports.signUp = async (req, res) => {
+    try {
+        const { email } = req.body;
+        await authService.signUp(email);
+        res.status(201).send('User created. Please check your email for password.');
+    } catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+};;
 
-const signUp = async (req, res) => {
-    const { email, password } = req.body;
-
-    const { user, error } = await supabase.auth.signUp({
-        email,
-        password
-    });
-
-    if (error) return res.status(400).json({ error: error.message });
-
-    await supabase.auth.resend({ email})
-    
-
-    res.status(200).json({ message: 'User signed up successfully' });
-};
-
-const signIn = async (req, res) => {
-    const { email, password } = req.body;
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-    });
-
-    if (error) return res.status(400).json({ error: error.message });
-
-    const token = jwt.sign({ userId: data.user.id }, config.JWT_SECRET, { expiresIn: '1h' });
-
-    res.status(200).json({ token });
-};
-
-module.exports = { signUp, signIn };
+/**
+ * Handles user login.
+ *
+ * @param {Object} req - The request object containing the user's email and password.
+ * @param {Object} res - The response object to send back to the client.
+ * @returns {void}
+ */
+exports.login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const token = await authService.login(email, password);
+        res.json({ token });
+    } catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+};;

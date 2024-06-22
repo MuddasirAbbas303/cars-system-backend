@@ -1,42 +1,84 @@
-const { getCars, createCar, updateCar, deleteCar } = require('../models/carModel');
+const carService = require('../services/carService');
 
-const getAllCars = async (req, res) => {
+/**
+ * Retrieves a list of cars for the authenticated user.
+ *
+ * @param {Object} req - The request object containing query parameters for pagination.
+ * @param {Object} res - The response object to send the result.
+ *
+ * @returns {void}
+ */
+exports.getCars = async (req, res) => {
     try {
-        const { page = 1, limit = 10 } = req.query;
-        const offset = (page - 1) * limit;
-        const cars = await getCars(offset, limit, page);
-        res.json(cars);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+
+        const result = await carService.getCars(req.user.userId, page, limit);
+
+        res.json(result);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).send(error.message);
     }
-};
+};;
 
-const addCar = async (req, res) => {
-
+/**
+ * Adds a new car to the database for the authenticated user.
+ *
+ * @param {Object} req - The request object containing the car data in the request body.
+ * @param {Object} res - The response object to send the result.
+ *
+ * @returns {void}
+ *
+ * @throws Will throw an error if the car data is invalid or if there is a database error.
+ * 
+ */
+exports.addCar = async (req, res) => {
     try {
-        const car = await createCar(req.body);
+        const { color, make, model, category_id, registration_no } = req.body;
+        const car = await carService.addCar(req.user.userId, color, make, model, category_id, registration_no);
+        res.status(201).json(car);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};;
+
+/**
+ * Updates an existing car in the database for the authenticated user.
+ *
+ * @param {Object} req - The request object containing the car data in the request body and the car id in the params.
+ * @param {Object} res - The response object to send the result.
+ *
+ * @returns {void}
+ *
+ * @throws Will throw an error if the car data is invalid or if there is a database error.
+ * 
+ */
+exports.updateCar = async (req, res) => {
+    try {
+        const { color, make, model, category_id, registration_no } = req.body;
+        const car = await carService.updateCar(req.user.userId, req.params.id, color, make, model, category_id, registration_no);
         res.json(car);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).send(error.message);
     }
 };
 
-const editCar = async (req, res) => {
+/**
+ * Deletes a car from the database for the authenticated user.
+ *
+ * @param {Object} req - The request object containing the car id in the params.
+ * @param {Object} res - The response object to send the result.
+ *
+ * @returns {void}
+ *
+ * @throws Will throw an error if there is a database error.
+ * 
+ */
+exports.deleteCar = async (req, res) => {
     try {
-        const car = await updateCar(req.params.id, req.body);
-        res.json(car);
+        await carService.deleteCar(req.user.userId, req.params.id);
+        res.json({ msg: 'Car removed' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).send(error.message);
     }
 };
-
-const removeCar = async (req, res) => {
-    try {
-        const car = await deleteCar(req.params.id);
-        res.json(car);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
-module.exports = { getAllCars, addCar, editCar, removeCar };
