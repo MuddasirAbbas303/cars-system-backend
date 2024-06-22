@@ -1,13 +1,12 @@
 const express = require('express');
-const { getAllCars, addCar, editCar, removeCar } = require('../controllers/carController');
-const { authenticateToken } = require('../middleware/authMiddleware');
+const router = express.Router();
+const carController = require('../controllers/carController');
+const { authMiddleware } = require('../middleware/authMiddleware');
 const { validateCar } = require('../utils/validation');
 
-const router = express.Router();
-
-router.get('/', authenticateToken, getAllCars);
-router.post('/', authenticateToken, validateCar, addCar);
-router.put('/:id', authenticateToken, validateCar, editCar);
-router.delete('/:id', authenticateToken, removeCar);
+router.get('/', authMiddleware, carController.getCars);
+router.post('/', authMiddleware, validateCar, carController.addCar);
+router.put('/:id', authMiddleware, carController.updateCar);
+router.delete('/:id', authMiddleware, carController.deleteCar);
 
 module.exports = router;
