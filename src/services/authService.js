@@ -1,17 +1,9 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const config = require('../configs/config');
-
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: config.EMAIL_USER,
-        pass: config.EMAIL_PASS
-    }
-});
+const { sendPasswordEmail } = require('../utils/email');
 
 /**
  * Registers a new user and sends a password to the user's email.
@@ -33,15 +25,10 @@ exports.signUp = async (email) => {
     const user = new User({ email, password: hashedPassword });
     await user.save();
 
-    const mailOptions = {
-        from: config.EMAIL_USER,
-        to: email,
-        subject: 'Account Created',
-        text: `Your password is ${password}`
-    };
-    await transporter.sendMail(mailOptions);
+    await sendPasswordEmail(email, password);
+
     return user;
-};;
+};
 
 /**
  * Logs in a user and generates a JWT token.
