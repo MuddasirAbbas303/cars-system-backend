@@ -18,6 +18,10 @@ exports.getCategories = async (userId) => {
  * @returns {Promise<Category>} - A promise that resolves to the newly created category.
  */
 exports.addCategory = async (userId, name) => {
+    const existingCategory = await Category.findOne({ name, user_id: userId });
+    if (existingCategory) {
+        throw new Error('Category already exists');
+    }
     const category = new Category({ name, user_id: userId });
     await category.save();
     return category;
